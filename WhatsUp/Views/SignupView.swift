@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import FirebaseAuth
 
 struct SignupView: View {
     
@@ -15,6 +16,16 @@ struct SignupView: View {
     
     private var isFormValidate : Bool{
         !email.isEmptyOrWhiteSpace && !password.isEmptyOrWhiteSpace && !displayName.isEmptyOrWhiteSpace
+    }
+    
+    private func signUp() async{
+        do{
+            let result = try await Auth.auth().createUser(withEmail: email, password: password)
+        }
+        catch{
+            print(error)
+        }
+     
     }
     
     var body: some View {
@@ -28,12 +39,19 @@ struct SignupView: View {
             
             HStack{
                 Spacer()
-                Button("Sign UP") {
+                Button("SignUP") {
                     Task{
-                        
+                        await signUp()
                     }
                 } .disabled(!isFormValidate)
-                    .buttonStyle(.borderless)            }
+                    .buttonStyle(.borderless)
+                
+                Button("Login"){
+                    
+                }
+                .buttonStyle(.borderless)
+                Spacer()
+            }
         }
     }
 }
