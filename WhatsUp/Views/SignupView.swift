@@ -13,20 +13,31 @@ struct SignupView: View {
     @State private var email: String = ""
     @State private var password: String = ""
     @State private var displayName: String = ""
+    @State private var errorMessage: String = ""
     
     private var isFormValidate : Bool{
         !email.isEmptyOrWhiteSpace && !password.isEmptyOrWhiteSpace && !displayName.isEmptyOrWhiteSpace
     }
     
+    private func updateUserName(user: User) async{
+            
+        let request = user.createProfileChangeRequest()
+        request.displayName = displayName
+        try? await request.commitChanges()
+        
+    }
+    
     private func signUp() async{
         do{
             let result = try await Auth.auth().createUser(withEmail: email, password: password)
+           await updateUserName(user: result.user)
         }
         catch{
-            print(error)
+            errorMessage = error.localizedDescription
         }
-     
     }
+    
+   
     
     var body: some View {
         Form {
@@ -52,6 +63,8 @@ struct SignupView: View {
                 .buttonStyle(.borderless)
                 Spacer()
             }
+            
+            Text(errorMessage)
         }
     }
 }
