@@ -7,6 +7,7 @@
 
 import SwiftUI
 import FirebaseCore
+import FirebaseAuth
 
 class AppDelegate: NSObject, UIApplicationDelegate {
   func application(_ application: UIApplication,
@@ -22,9 +23,39 @@ struct WhatsUpApp: App {
     // register app delegate for Firebase setup
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     
+    @StateObject private var userModel = UserModel()
+    @StateObject private var appstate = AppState()
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+           
+            NavigationStack(path: $appstate.routes){
+                
+                ZStack{
+                    
+                    if Auth.auth().currentUser != nil{
+                        MainView()
+//                        SignupView()
+                    }
+                    else{
+                        LoginView()
+                    }
+                }
+                .navigationDestination(for: Routes.self) { route in
+                    switch route{
+                    case .main:
+                        MainView()
+                    case .login:
+                        LoginView()
+                    case .signup:
+                        SignupView()
+                    }
+                }
+                
+            }
+            .environmentObject(userModel)
+            .environmentObject(appstate)
+           
         }
     }
 }

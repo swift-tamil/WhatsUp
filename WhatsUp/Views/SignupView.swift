@@ -15,22 +15,27 @@ struct SignupView: View {
     @State private var displayName: String = ""
     @State private var errorMessage: String = ""
     
+    @EnvironmentObject private var userModel: UserModel
+    @EnvironmentObject private var appstate: AppState
+    
     private var isFormValidate : Bool{
         !email.isEmptyOrWhiteSpace && !password.isEmptyOrWhiteSpace && !displayName.isEmptyOrWhiteSpace
     }
     
-    private func updateUserName(user: User) async{
-            
-        let request = user.createProfileChangeRequest()
-        request.displayName = displayName
-        try? await request.commitChanges()
-        
-    }
+//    private func updateUserName(user: User) async{
+//            
+//        let request = user.createProfileChangeRequest()
+//        request.displayName = displayName
+//        try? await request.commitChanges()
+//        
+//    }
     
     private func signUp() async{
         do{
             let result = try await Auth.auth().createUser(withEmail: email, password: password)
-           await updateUserName(user: result.user)
+            try await userModel.updateDisplayName(for: result.user, displayName: displayName)
+            appstate.routes.append(.login)
+            //           await updateUserName(user: result.user)
         }
         catch{
             errorMessage = error.localizedDescription
@@ -58,7 +63,7 @@ struct SignupView: View {
                     .buttonStyle(.borderless)
                 
                 Button("Login"){
-                    
+                    appstate.routes.append(.login)
                 }
                 .buttonStyle(.borderless)
                 Spacer()
@@ -71,6 +76,7 @@ struct SignupView: View {
 
 struct SignupView_Previews: PreviewProvider {
     static var previews: some View {
-        SignupView()
+        SignupView().environmentObject(UserModel())
+            .environmentObject(AppState())
     }
 }
